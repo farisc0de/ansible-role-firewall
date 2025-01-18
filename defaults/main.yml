@@ -1,0 +1,36 @@
+---
+# Default firewall configuration
+
+# Port configurations
+firewall_allowed_tcp_ports:
+  - "{{ http_port | default(80) }}"
+  - "{{ https_port | default(443) }}"
+  - "22"  # SSH
+
+# UDP ports to allow
+firewall_allowed_udp_ports: []
+
+# Custom rules in format: { port: PORT, protocol: tcp/udp, source: SOURCE_IP }
+firewall_custom_rules: []
+
+# Whether to enable logging for dropped packets
+firewall_enable_logging: false
+
+# Log level for dropped packets (if logging enabled)
+firewall_log_level: "LOG --log-level 4"
+
+# Default policies
+firewall_default_input_policy: "DROP"
+firewall_default_forward_policy: "DROP"
+firewall_default_output_policy: "ACCEPT"
+
+# Whether to save rules on change
+firewall_save_rules: true
+
+# Path to save iptables rules (distribution specific)
+firewall_rules_path:
+  Debian: "/etc/iptables/rules.v4"
+  RedHat: "/etc/sysconfig/iptables"
+
+http_port: 80
+https_port: 443

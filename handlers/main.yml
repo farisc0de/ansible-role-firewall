@@ -1,0 +1,13 @@
+---
+- name: Save firewall rules
+  ansible.builtin.service:
+    name: firewalld
+    state: restarted
+  when: ansible_os_family == 'RedHat'
+  changed_when: false
+
+- name: Save netfilter rules
+  ansible.builtin.shell: |
+    /usr/sbin/netfilter-persistent save
+  when: ansible_os_family == 'Debian'
+  changed_when: false

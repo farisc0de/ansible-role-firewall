@@ -1,0 +1,67 @@
+---
+# Main tasks file for firewall role
+
+- name: Gather facts about the system
+  ansible.builtin.setup:
+  tags: setup
+
+- name: Include pre-checks
+  ansible.builtin.import_tasks: pre_checks.yml
+  tags: ['firewall', 'firewall_install']
+
+- name: Ensure firewalld is installed (RedHat)
+  ansible.builtin.package:
+    name: firewalld
+    state: present
+  when: ansible_os_family == 'RedHat'
+  tags: ['firewall', 'firewall_install']
+
+- name: Ensure firewalld service is enabled and started (RedHat)
+  ansible.builtin.service:
+    name: firewalld
+    state: started
+    enabled: true
+  when: ansible_os_family == 'RedHat'
+  tags: ['firewall', 'firewall_config']
+
+- name: Configure firewalld rules (RedHat)
+  ansible.posix.firewalld:
+    port: "{{ item }}/tcp"
+    permanent: true
+    state: enabled
+  with_items: "{{ firewall_allowed_tcp_ports }}"
+  when: ansible_os_family == 'RedHat'
+  notify: Save firewall rules
+  tags: ['firewall', 'firewall_config']
+
+- name: Configure firewalld UDP rules (RedHat)
+  ansible.posix.firewalld:
+    port: "{{ item }}/udp"
+    permanent: true
+    state: enabled
+  with_items: "{{ firewall_allowed_udp_ports }}"
+  when: ansible_os_family == 'RedHat'
+  notify: Save firewall rules
+  tags: ['firewall', 'firewall_config']
+
+- name: Configure custom firewalld rules (RedHat)
+  ansible.posix.firewalld:
+    port: "{{ item.port }}/{{ item.protocol }}"
+    source: "{{ item.source | default(omit) }}"
+    permanent: true
+    state: enabled
+  with_items: "{{ firewall_custom_rules }}"
+  when: ansible_os_family == 'RedHat'
+  notify: Save firewall rules
+  tags: ['firewall', 'firewall_config']
+
+- name: Include iptables configuration (Debian)
+  ansible.builtin.import_tasks: configure_rules.yml
+  when: ansible_os_family == 'Debian'
+  tags: ['firewall', 'firewall_config']
+
+- name: Trigger rules save
+  ansible.builtin.notify:
+    - Save firewall rules
+    - Save netfilter rules
+  when: firewall_save_rules | bool

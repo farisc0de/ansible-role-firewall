@@ -1,0 +1,19 @@
+---
+- name: Check if running as root
+  ansible.builtin.fail:
+    msg: "This role requires root privileges"
+  when: ansible_user_id != 'root'
+
+- name: Install required packages (RedHat)
+  ansible.builtin.package:
+    name: firewalld
+    state: present
+  when: ansible_os_family == 'RedHat'
+
+- name: Install required packages (Debian)
+  ansible.builtin.package:
+    name:
+      - iptables
+      - iptables-persistent
+    state: present
+  when: ansible_os_family == 'Debian'
