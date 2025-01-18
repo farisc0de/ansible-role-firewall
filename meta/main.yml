@@ -1,5 +1,6 @@
 ---
 galaxy_info:
+  role_name: firewall
   author: Faris AL-Otaibi
   description: A flexible firewall management role that supports both firewalld (RedHat) and iptables (Debian)
   namespace: farisc0de
