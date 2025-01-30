@@ -61,7 +61,9 @@
   tags: ['firewall', 'firewall_config']
 
 - name: Trigger rules save
-  ansible.builtin.notify:
+  ansible.builtin.debug:
+    msg: "Triggering firewall rules save"
+  notify:
     - Save firewall rules
     - Save netfilter rules
   when: firewall_save_rules | bool

@@ -1,36 +1,41 @@
 ---
 # Default firewall configuration
 
+# Common web ports - defined first as they are used in firewall_allowed_tcp_ports
+firewall_http_port: 80
+firewall_https_port: 443
+firewall_ssh_port: 22
+
 # Port configurations
 firewall_allowed_tcp_ports:
-  - "{{ http_port | default(80) }}"
-  - "{{ https_port | default(443) }}"
-  - "22"  # SSH
+  - "{{ firewall_http_port }}"
+  - "{{ firewall_https_port }}"
+  - "{{ firewall_ssh_port }}"
 
 # UDP ports to allow
 firewall_allowed_udp_ports: []
 
-# Custom rules in format: { port: PORT, protocol: tcp/udp, source: SOURCE_IP }
+# Custom rules list
+# Example:
+# firewall_custom_rules:
+#   - port: 8080
+#     protocol: tcp
+#     source: 192.168.1.0/24
 firewall_custom_rules: []
 
-# Whether to enable logging for dropped packets
+# Logging configuration
 firewall_enable_logging: false
+firewall_log_level: "4"  # Valid values: 1 (alert) through 7 (debug)
 
-# Log level for dropped packets (if logging enabled)
-firewall_log_level: "LOG --log-level 4"
+# Default chain policies
+firewall_default_input_policy: "DROP"     # Secure default: DROP
+firewall_default_forward_policy: "DROP"    # Secure default: DROP
+firewall_default_output_policy: "ACCEPT"   # Common default: ACCEPT
 
-# Default policies
-firewall_default_input_policy: "DROP"
-firewall_default_forward_policy: "DROP"
-firewall_default_output_policy: "ACCEPT"
-
-# Whether to save rules on change
+# Rules persistence
 firewall_save_rules: true
 
-# Path to save iptables rules (distribution specific)
+# Distribution-specific paths for iptables rules
 firewall_rules_path:
   Debian: "/etc/iptables/rules.v4"
   RedHat: "/etc/sysconfig/iptables"
-
-http_port: 80
-https_port: 443
